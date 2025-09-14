@@ -1,0 +1,49 @@
+body.lightmode {
+    --background: linear-gradient(135deg, #f0f0f0, #d9e4f5);
+    --text-color: #333333;
+    --nav-background: white;
+    --nav-text: black;
+    --nav-tab-background: white;
+    --nav-tab-text: black;
+    --nav-tab-border: #ddd;
+    --nav-tab-hover-background: linear-gradient(45deg, #2c003e, #5a007f);
+    --nav-tab-hover-text: white;
+    --input-border: #ccc;
+    --input-background: white;
+    --input-text: black;
+    --input-focus-border: #5a007f;
+    --button-background: #5a007f;
+    --button-text: white;
+    --button-hover-background: #2c003e;
+    --movie-background: white;
+    --movie-shadow: rgba(0,0,0,0.1);
+    --title-color: #222;
+    --overview-color: #555;
+    --meta-color: #666;
+    --meta-bold-color: #333;
+}
+
+body.darkmode {
+    --background: linear-gradient(135deg, #121212, #1c1c1c);
+    --text-color: #E0E0E0;
+    --nav-background: #1c1c1c;
+    --nav-text: #FFFFFF;
+    --nav-tab-background: #2c003e;
+    --nav-tab-text: #FFFFFF;
+    --nav-tab-border: #5a007f;
+    --nav-tab-hover-background: linear-gradient(45deg, #5a007f, #2c003e);
+    --nav-tab-hover-text: #FFFFFF;
+    --input-border: #5a007f;
+    --input-background: #2c003e;
+    --input-text: #FFFFFF;
+    --input-focus-border: #ff5722;
+    --button-background: #5a007f;
+    --button-text: #FFFFFF;
+    --button-hover-background: #2c003e;
+    --movie-background: #1c1c1c;
+    --movie-shadow: rgba(0,0,0,0.5);
+    --title-color: #FFFFFF;
+    --overview-color: #CCCCCC;
+    --meta-color: #AAAAAA;
+    --meta-bold-color: #FFFFFF;
+}

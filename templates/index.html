@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Recommender</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='appearance.css') }}">
+    <style>
+        /* Recommendation Button Styles */
+        .movie-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .recommend-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+
+        .recommend-btn:hover {
+            background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Recommendations Modal Styles */
+        .recommendations-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .recommendations-modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 90%;
+            max-height: 80%;
+            width: 800px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .recommendations-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recommendations-header h3 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .recommendations-content {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .recommendation-movie {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .recommendation-movie:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendation-poster {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .recommendation-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .recommendation-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .recommendation-overview {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Dark mode support for recommendations */
+        body.darkmode .recommendations-modal {
+            background: #2b2b2b;
+            color: #ddd;
+        }
+
+        body.darkmode .recommendation-movie {
+            background: #3a3a3a;
+            color: #ddd;
+        }
+
+        body.darkmode .recommendation-movie:hover {
+            background: #4a4a4a;
+        }
+
+        body.darkmode .recommendation-title {
+            color: #fff;
+        }
+
+        body.darkmode .recommendation-overview {
+            color: #bbb;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .recommendations-modal {
+                max-width: 95%;
+                max-height: 90%;
+            }
+
+            .recommendations-header {
+                padding: 15px 20px;
+            }
+
+            .recommendations-header h3 {
+                font-size: 20px;
+            }
+
+            .recommendation-movie {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .recommendation-poster {
+                width: 100%;
+                height: auto;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+
+</head>
+<body  class="darkmode">
+    <nav class="navbar">
+        <div class="nav-links">
+            <div class="nav-tab" onclick="window.location.href='/'">Home</div>
+            <div class="nav-tab" onclick="window.location.href='/recommendation'">Recommendation</div>
+        </div>
+        <div class="theme-switch">
+            <label class="switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </nav>
+    <h1>Movie Recommendation System</h1>
+
+    <!-- Search box -->
+    <div class="search-bar">
+        <input type="text" id="searchBox" placeholder="Search by genre, title, or overview">
+        <button onclick="searchMovies()">Search</button>
+    </div>
+
+    <!-- Results -->
+    <div id="results"></div>
+
+
+
+    <script>
+        function goToMovie(movieId) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.transition = 'opacity 0.5s';
+            resultsDiv.style.opacity = '0';
+            setTimeout(() => {
+                window.location.href = `/movie/${movieId}`;
+            }, 500);
+        }
+
+
+        async function getRecommendations(movieId) {
+            try {
+                const response = await fetch('/recommend_by_genre', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ movie_id: movieId })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                // Display recommendations
+                displayRecommendations(data, movieId);
+            } catch (error) {
+                console.error('Error fetching recommendations:', error);
+                alert('Error fetching recommendations. Please try again.');
+            }
+        }
+
+        function displayRecommendations(recommendations, originalMovieId) {
+            const resultsDiv = document.getElementById('results');
+            
+            // Create a modal-like overlay for recommendations
+            const overlay = document.createElement('div');
+            overlay.className = 'recommendations-overlay';
+            overlay.innerHTML = `
+                <div class="recommendations-modal">
+                    <div class="recommendations-header">
+                        <h3>🎬 Similar Movies</h3>
+                        <button class="close-btn" onclick="closeRecommendations()">&times;</button>
+                    </div>
+                    <div class="recommendations-content" id="recommendationsContent">
+                        ${recommendations.length === 0 ? '<p>No similar movies found.</p>' : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Display recommended movies
+            const contentDiv = document.getElementById('recommendationsContent');
+            if (recommendations.length > 0) {
+                recommendations.forEach(movie => {
+                    const poster = movie.poster_url ? movie.poster_url : 'https://via.placeholder.com/100x150?text=No+Image';
+                    const movieDiv = document.createElement('div');
+                    movieDiv.className = 'recommendation-movie';
+                    movieDiv.innerHTML = `
+                        <img src="${poster}" alt="Poster" class="recommendation-poster">
+                        <div class="recommendation-details">
+                            <div class="recommendation-title">${movie.title} (${movie.release_date})</div>
+                            <div><b>Genre:</b> ${movie.genre}</div>
+                            <div class="recommendation-overview">${movie.overview}</div>
+                            <div><b>Votes:</b> ${movie.vote_count} | <b>Rating:</b> ${movie.vote_average}</div>
+                        </div>
+                    `;
+                    movieDiv.onclick = () => goToMovie(movie.id);
+                    contentDiv.appendChild(movieDiv);
+                });
+            }
+        }
+
+        function closeRecommendations() {
+            const overlay = document.querySelector('.recommendations-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+
+        async function searchMovies(query = '') {
+            if (query === '') {
+                const input = document.getElementById('searchBox');
+                query = input.value.trim();
+            }
+            // Call the Flask backend
+            const response = await fetch('/recommend', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ query: query })
+            });
+
+            const data = await response.json();
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.opacity = '1';
+            resultsDiv.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                resultsDiv.innerHTML = '<p>No movies found.</p>';
+                return;
+            }
+
+            // Display movies
+            data.forEach(movie => {
+                const poster = movie.poster_url ? movie.poster_url : 'https://via.placeholder.com/100x150?text=No+Image';
+                const movieDiv = document.createElement('div');
+                movieDiv.className = 'movie';
+                movieDiv.innerHTML = `
+                    <img src="${poster}" alt="Poster" class="poster">
+                    <div class="details">
+                        <div class="title">${movie.title} (${movie.release_date})</div>
+                        <div><b>Genre:</b> ${movie.genre}</div>
+                        <div class="overview">${movie.overview}</div>
+                        <div><b>Votes:</b> ${movie.vote_count} | <b>Rating:</b> ${movie.vote_average}</div>
+                        <div class="movie-actions">
+                            <button class="recommend-btn" onclick="event.stopPropagation(); getRecommendations(${movie.id})">
+                                🎬 Find Similar Movies
+                            </button>
+                        </div>
+                    </div>`;
+                movieDiv.onclick = () => goToMovie(movie.id);
+
+                resultsDiv.appendChild(movieDiv);
+            });
+
+
+        const toggle = document.getElementById('themeToggle');
+        toggle.addEventListener('change', () => {
+            if(toggle.checked){
+                document.body.classList.remove('darkmode');
+                document.body.classList.add('lightmode');
+            } else {
+                document.body.classList.remove('lightmode');
+                document.body.classList.add('darkmode');
+            }
+        }); 
+
+        }
+
+        // Load top movies on page load
+        window.onload = () => {
+            searchMovies();
+        };
+    </script>
+</body>
+</html>

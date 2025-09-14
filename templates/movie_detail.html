@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Detail</title>
+    <style>
+        /* ================= THEME VARIABLES ================= */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #111111;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --meta-color: #444;
+        }
+
+        body.darkmode {
+            --bg-color: #121212;
+            --text-color: #f5f5f5;
+            --card-bg: rgba(25, 25, 25, 0.9);
+            --meta-color: #bbbbbb;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: url('{{ movie.poster_backdrop_url }}') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-tab {
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 12px;
+            background: #4a0e75;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-tab:hover {
+            background: #330a52;
+        }
+
+        /* ================= SWITCH ================= */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4a0e75;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* ================= MOVIE CARD ================= */
+        .center-box {
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+            max-width: 800px;
+            margin: 48px auto;
+            padding: 32px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 32px;
+            position: relative;
+            backdrop-filter: blur(6px);
+            transition: background 0.3s;
+        }
+
+        .poster-img {
+            width: 170px;
+            min-width: 120px;
+            max-width: 170px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+            margin-right: 24px;
+        }
+
+        .movie-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .movie-title {
+            font-size: 2.1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-color);
+        }
+
+        .movie-meta {
+            font-size: 1.1rem;
+            color: var(--meta-color);
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .movie-overview {
+            font-size: 1.05rem;
+            color: var(--text-color);
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .trailer-btn {
+            display: inline-block;
+            background: #e52d27;
+            color: white;
+            font-weight: 500;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(229,45,39,0.25);
+            width: fit-content;
+        }
+
+        .trailer-btn:hover {
+            background: #b31217;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 600px) {
+            .center-box {
+                flex-direction: column;
+                align-items: center;
+                padding: 18px 6vw;
+                gap: 18px;
+            }
+            .poster-img {
+                width: 120px;
+                max-width: 120px;
+                margin: 0 0 12px 0;
+            }
+            .movie-title {
+                font-size: 1.4rem;
+                text-align: center;
+            }
+            .movie-overview {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body class="darkmode">
+
+    <nav class="navbar">
+        <div class="nav-links">
+            <div class="nav-tab" onclick="window.location.href='/'">Home</div>
+            <div class="nav-tab" onclick="window.location.href='/recommendation'">Recommendation</div>
+        </div>
+        <div class="theme-switch">
+            <label class="switch">
+                <input type="checkbox" id="themeToggle" checked>
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </nav>
+
+    <div class="center-box">
+        <img class="poster-img" src="{{ movie.poster_url }}" alt="Movie Poster">
+        <div class="movie-details">
+            <div class="movie-title">{{ movie.title }}</div>
+            <div class="movie-meta">
+                <span><strong>IMDB:</strong> {{ movie.vote_average }}</span>
+                <span><strong>Revenue:</strong> ${{ movie.revenue }}</span>
+                <span><strong>Release:</strong> {{ movie.release_date }}</span>
+            </div>
+            <div class="movie-overview">
+                {{ movie.overview }}
+            </div>
+            <a class="trailer-btn" target="_blank" href="https://www.youtube.com/results?search_query={{ movie.title | replace(' ', '+') }}+trailer">
+                ▶ Watch Trailer on YouTube
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('themeToggle');
+            const body = document.body;
+
+            // default: dark mode
+            body.classList.add('darkmode');
+            toggle.checked = true;
+
+            toggle.addEventListener('change', () => {
+                if (toggle.checked) {
+                    body.classList.remove('lightmode');
+                    body.classList.add('darkmode');
+                } else {
+                    body.classList.remove('darkmode');
+                    body.classList.add('lightmode');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
